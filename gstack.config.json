@@ -1,0 +1,7 @@
+{
+  "framework": "nextjs",
+  "auth": "better-auth",
+  "database": "postgresql",
+  "validation": "zod",
+  "timestamp": "2026-06-15T12:06:04.355Z"
+}
