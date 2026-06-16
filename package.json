@@ -1,5 +1,5 @@
 {
-  "name": "g-stack",
+  "name": "create-g-stack",
   "module": "index.ts",
   "bin": {
     "g-stack": "./src/index.ts"
