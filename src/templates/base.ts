@@ -15,7 +15,7 @@ export const baseTemplate: TemplateFile[] = [
           "lint": "next lint"
         },
         dependencies: {
-          "next": "^15.1.0",
+          "next": "^16.2.9",
           "react": "^19.0.0",
           "react-dom": "^19.0.0"
         },
@@ -70,13 +70,9 @@ export const baseTemplate: TemplateFile[] = [
   {
     path: "next.config.ts",
     content: `import type { NextConfig } from "next";
-import path from "path";
 
 const nextConfig: NextConfig = {
   /* config options here */
-  turbopack: {
-    root: path.dirname(__dirname),
-  },
 };
 
 export default nextConfig;
@@ -91,25 +87,6 @@ export default nextConfig;
 };
 
 export default postcssConfig;
-`
-  },
-  {
-    path: "tailwind.config.ts",
-    content: `import type { Config } from "tailwindcss";
-
-const config: Config = {
-  content: [
-    "./pages/**/*.{js,ts,jsx,tsx,mdx}",
-    "./components/**/*.{js,ts,jsx,tsx,mdx}",
-    "./app/**/*.{js,ts,jsx,tsx,mdx}",
-  ],
-  theme: {
-    extend: {},
-  },
-  plugins: [],
-};
-
-export default config;
 `
   },
   {
