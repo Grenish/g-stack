@@ -1,6 +1,9 @@
 {
   "name": "g-stack",
   "module": "index.ts",
+  "bin": {
+    "g-stack": "./src/index.ts"
+  },
   "type": "module",
   "private": true,
   "devDependencies": {
