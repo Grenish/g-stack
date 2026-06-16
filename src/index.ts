@@ -1,21 +1,40 @@
-import { select } from "@inquirer/prompts";
+#!/usr/bin/env bun
+import { select, input, confirm } from "@inquirer/prompts";
 import pc from "picocolors";
 import path from "node:path";
+import fs from "node:fs";
+import { isDirEmpty } from "./utils/fs-helpers";
+import { detectPackageManager } from "./utils/package-manager";
+import { generateProject } from "./utils/project-generator";
+
+let activeSpinnerInterval: any = null;
+let activeStepText = "";
+const frames = ["⠋", "⠙", "⠹", "⠸", "⠼", "⠴", "⠦", "⠧", "⠇", "⠏"];
+let frameIndex = 0;
 
 /**
- * Custom spinner animation for clean and professional console output.
+ * Animated step-by-step console progress indicator.
  */
-async function showSpinner(text: string, durationMs: number) {
-  const frames = ["⠋", "⠙", "⠹", "⠸", "⠼", "⠴", "⠦", "⠧", "⠇", "⠏"];
-  let i = 0;
-  const interval = setInterval(() => {
-    process.stdout.write(`\r${pc.magenta(frames[i])} ${text}`);
-    i = (i + 1) % frames.length;
+function handleStepChange(stepText: string) {
+  if (activeSpinnerInterval) {
+    clearInterval(activeSpinnerInterval);
+    // Clear line and print success for the previous step
+    process.stdout.write(`\r\x1b[K${pc.green("✔")} ${activeStepText}\n`);
+  }
+  
+  activeStepText = stepText;
+  activeSpinnerInterval = setInterval(() => {
+    process.stdout.write(`\r\x1b[K${pc.magenta(frames[frameIndex])} ${activeStepText}`);
+    frameIndex = (frameIndex + 1) % frames.length;
   }, 80);
+}
 
-  await new Promise((resolve) => setTimeout(resolve, durationMs));
-  clearInterval(interval);
-  process.stdout.write(`\r${pc.green("")} ${text} ${pc.dim("(Done)")}\n`);
+function stopProgress(success = true) {
+  if (activeSpinnerInterval) {
+    clearInterval(activeSpinnerInterval);
+    process.stdout.write(`\r\x1b[K${success ? pc.green("✔") : pc.red("✖")} ${activeStepText}\n`);
+    activeSpinnerInterval = null;
+  }
 }
 
 /**
@@ -24,26 +43,27 @@ async function showSpinner(text: string, durationMs: number) {
 function stripAnsi(str: string): string {
   return str.replace(
     /[\u001b\u009b][[()#;?]*(?:[0-9]{1,4}(?:;[0-9]{0,4})*)?[0-9A-ORZcf-nqry=><]/g,
-    "",
+    ""
   );
 }
 
 /**
- * Renders a highly polished configuration box containing selections and status.
+ * Renders the final status card.
  */
 function renderSummary(
   framework: string,
   auth: string,
   db: string,
   validation: string,
-  configSaved: boolean,
+  shadcn: boolean,
+  projectName: string,
+  targetPath: string
 ) {
   const width = 58;
   const border = pc.magenta;
 
   const getLine = (content: string) => {
     const visualLength = stripAnsi(content).length;
-    // Account for border character and margins: width - visualLength - (2 borders + 4 spaces padding)
     const paddingSize = Math.max(0, width - visualLength - 6);
     const padding = " ".repeat(paddingSize);
     return `${border("│")}  ${content}${padding}  ${border("│")}`;
@@ -54,57 +74,51 @@ function renderSummary(
   // Pretty value mapping for display
   const displayValues = {
     framework: framework === "nextjs" ? "Next.js" : "React + Vite",
-    auth: auth === "better-auth" ? "Better Auth" : "Clerk",
-    db:
-      db === "postgresql"
-        ? "PostgreSQL"
-        : db === "prisma"
-          ? "Prisma ORM"
-          : "MongoDB",
+    auth: auth === "better-auth" ? "Better Auth" : auth === "authjs" ? "Auth.js" : "None (Skipped)",
+    db: db === "postgresql" ? "PostgreSQL (Prisma)" : "None (Skipped)",
     validation: validation === "zod" ? "Zod Validation" : "None (Skipped)",
+    shadcn: shadcn ? "Yes (Shadcn UI)" : "None (Skipped)",
   };
+
+  const pm = detectPackageManager();
+  const relPath = path.relative(process.cwd(), targetPath);
+  const cdCmd = relPath && relPath !== "." ? `cd ${relPath}` : "";
 
   console.log("");
   console.log(border("┌" + "─".repeat(width - 2) + "┐"));
   console.log(getLine(pc.bold(pc.white("Selected Configurations"))));
   console.log(getLine(""));
-  console.log(
-    getLine(
-      `${pc.dim("Framework:".padEnd(14))} ${pc.cyan(displayValues.framework)}`,
-    ),
-  );
-  console.log(
-    getLine(`${pc.dim("Auth:".padEnd(14))} ${pc.yellow(displayValues.auth)}`),
-  );
-  console.log(
-    getLine(`${pc.dim("Database:".padEnd(14))} ${pc.blue(displayValues.db)}`),
-  );
-  console.log(
-    getLine(
-      `${pc.dim("Validation:".padEnd(14))} ${pc.magenta(displayValues.validation)}`,
-    ),
-  );
-
-  if (configSaved) {
-    console.log(getLine(""));
-    console.log(
-      getLine(
-        `${pc.green("")} ${pc.dim("Saved workspace config to gstack.config.json")}`,
-      ),
-    );
+  console.log(getLine(`${pc.dim("Framework:".padEnd(14))} ${pc.cyan(displayValues.framework)}`));
+  console.log(getLine(`${pc.dim("Auth:".padEnd(14))} ${pc.yellow(displayValues.auth)}`));
+  console.log(getLine(`${pc.dim("Database:".padEnd(14))} ${pc.blue(displayValues.db)}`));
+  console.log(getLine(`${pc.dim("Validation:".padEnd(14))} ${pc.magenta(displayValues.validation)}`));
+  console.log(getLine(`${pc.dim("Shadcn UI:".padEnd(14))} ${pc.green(displayValues.shadcn)}`));
+  console.log(getLine(""));
+  console.log(lineSeparator);
+  console.log(getLine(""));
+  console.log(getLine(pc.bold(pc.green("🚀 Project scaffolded successfully!"))));
+  console.log(getLine(""));
+  console.log(getLine(pc.white("Next steps:")));
+  
+  if (cdCmd) {
+    console.log(getLine(`  1. ${pc.cyan(cdCmd)}`));
+  }
+  
+  const stepIndex = cdCmd ? 2 : 1;
+  
+  if (db === "postgresql") {
+    console.log(getLine(`  ${stepIndex}. Configure ${pc.yellow("DATABASE_URL")} in .env`));
+    console.log(getLine(`  ${stepIndex + 1}. Run migrations: ${pc.cyan(pm === "npm" ? "npx prisma db push" : `${pm}x prisma db push`)}`));
+    console.log(getLine(`  ${stepIndex + 2}. Run dev server: ${pc.cyan(pm === "npm" ? "npm run dev" : `${pm} dev`)}`));
+  } else {
+    console.log(getLine(`  ${stepIndex}. Run dev server: ${pc.cyan(pm === "npm" ? "npm run dev" : `${pm} dev`)}`));
   }
 
   console.log(getLine(""));
   console.log(lineSeparator);
   console.log(getLine(""));
-  console.log(
-    getLine(
-      `${pc.yellow("●")}  ${pc.yellow(pc.bold("The work is still in progress."))}`,
-    ),
-  );
-  console.log(
-    getLine(pc.dim("   Check back soon for the full generation features!")),
-  );
+  console.log(getLine(`${pc.yellow("●")}  ${pc.yellow(pc.bold("The work is still in progress."))}`));
+  console.log(getLine(pc.dim("   Check back soon for the full generation features!")));
   console.log(getLine(""));
   console.log(border("└" + "─".repeat(width - 2) + "┘"));
   console.log("");
@@ -115,151 +129,129 @@ async function main() {
   console.clear();
 
   // Detect runtime and system details
-  const runtime =
-    typeof Bun !== "undefined"
-      ? `Bun v${Bun.version}`
-      : `Node ${process.version}`;
+  const runtime = typeof Bun !== "undefined" ? `Bun v${Bun.version}` : `Node ${process.version}`;
   const platform = `${process.platform}-${process.arch}`;
 
-  // Simple, clean header logo
+  // Print header
   console.log("");
-  console.log(
-    `  ${pc.bold(pc.magenta("g-stack"))} ${pc.dim("•")} ${pc.cyan(runtime)} ${pc.dim("•")} ${pc.green(platform)}`,
-  );
-  console.log(
-    `  ${pc.dim("Interactive project generator for modern fullstack apps")}`,
-  );
+  console.log(`  ${pc.bold(pc.magenta("g-stack"))} ${pc.dim("•")} ${pc.cyan(runtime)} ${pc.dim("•")} ${pc.green(platform)}`);
+  console.log(`  ${pc.dim("Interactive project generator for modern fullstack apps")}`);
   console.log("");
 
-  // Common inquirer theme to style prefixes, highlight colors and messaging
+  // Common inquirer theme
   const inquirerTheme = {
     prefix: pc.magenta("❯"),
     style: {
       message: (text: string) => pc.bold(pc.white(text)),
       answer: (text: string) => pc.cyan(text),
       highlight: (text: string) => pc.magenta(pc.bold(text)),
-    },
+    }
   };
 
   try {
-    // 1. Framework Selection
-    const framework = await select({
-      message: "Pick a framework for your app",
-      choices: [
-        {
-          value: "nextjs",
-          name: "Next.js (Recommended)",
-          description: "App Router, Server Components & Actions",
-        },
-        {
-          value: "react+vite",
-          name: "React + Vite",
-          description: "Single Page App with client-side routing",
-        },
-      ],
+    // 1. Project Location
+    const rawLocation = await input({
+      message: "Where should we create your project?",
+      default: ".",
       theme: inquirerTheme,
+      validate: (input) => {
+        if (!input.trim()) return "Project location cannot be empty";
+        return true;
+      }
     });
+
+    const projectLocation = rawLocation.trim();
+    const targetPath = projectLocation === "." ? process.cwd() : path.resolve(process.cwd(), projectLocation);
+    const projectName = projectLocation === "." ? path.basename(process.cwd()) : path.basename(projectLocation);
+
+    // Safety check: is directory empty?
+    if (!isDirEmpty(targetPath)) {
+      const proceed = await confirm({
+        message: "Target directory is not empty. Proceed and potentially overwrite files?",
+        default: false,
+        theme: inquirerTheme
+      });
+      if (!proceed) {
+        console.log(pc.yellow("\nSetup aborted."));
+        process.exit(0);
+      }
+    }
 
     // 2. Auth Selection
     const auth = await select({
-      message: "Choose an authentication provider",
+      message: "Select authentication provider",
       choices: [
-        {
-          value: "better-auth",
-          name: "Better Auth",
-          description: "Modern, secure, framework-agnostic auth",
-        },
-        {
-          value: "clerk",
-          name: "Clerk",
-          description: "Managed authentication, user profiles & webhooks",
-        },
+        { value: "better-auth", name: "Better Auth", description: "Modern, secure, framework-agnostic auth (requires DB)" },
+        { value: "authjs", name: "Auth.js", description: "Flexible authentication library for Next.js" },
+        { value: "skip", name: "Skip", description: "No authentication setup" }
       ],
       theme: inquirerTheme,
     });
 
-    // 3. Database Selection
-    const db = await select({
-      message: "Select a database / ORM setup",
-      choices: [
-        {
-          value: "postgresql",
-          name: "PostgreSQL",
-          description: "Robust SQL relational database",
-        },
-        {
-          value: "prisma",
-          name: "Prisma ORM",
-          description: "Next-generation Node.js & TypeScript ORM",
-        },
-        {
-          value: "mongodb",
-          name: "MongoDB",
-          description: "Flexible document-based NoSQL database",
-        },
-      ],
-      theme: inquirerTheme,
-    });
-
-    // 4. Schema Validation Selection
-    const validation = await select({
-      message: "Add schema validation library?",
-      choices: [
-        {
-          value: "zod",
-          name: "Zod",
-          description: "TypeScript-first schema validation",
-        },
-        {
-          value: "skip",
-          name: "Skip validation",
-          description: "Proceed without Zod",
-        },
-      ],
-      theme: inquirerTheme,
-    });
-
-    // Simulated installation steps
-    console.log("");
-    await showSpinner("Scaffolding project structure...", 1200);
-    await showSpinner("Installing dependencies (bun)...", 1500);
-    await showSpinner(
-      `Configuring ${framework} with ${auth}, ${db}, and ${validation === "zod" ? "Zod" : "no validation"}...`,
-      1200,
-    );
-
-    // Save choices to a local configuration file for true persistence
-    let configSaved = false;
-    try {
-      const configPath = path.join(process.cwd(), "gstack.config.json");
-      const configData = {
-        framework,
-        auth,
-        database: db,
-        validation,
-        timestamp: new Date().toISOString(),
-      };
-      await Bun.write(configPath, JSON.stringify(configData, null, 2));
-      configSaved = true;
-      console.log(
-        `${pc.green("")} Saved workspace configuration to gstack.config.json`,
-      );
-    } catch (e) {
-      // Ignore write errors if permission-restricted in certain test containers
+    // 3. Database Selection (dependency checking)
+    let db: "postgresql" | "skip" = "skip";
+    if (auth === "better-auth") {
+      db = "postgresql";
+      console.log(`  ${pc.cyan("ℹ")} PostgreSQL automatically selected (required by Better Auth)`);
+    } else {
+      db = await select({
+        message: "Select database",
+        choices: [
+          { value: "postgresql", name: "PostgreSQL", description: "PostgreSQL relational database with Prisma ORM" },
+          { value: "skip", name: "Skip", description: "No database setup" }
+        ],
+        theme: inquirerTheme,
+      });
     }
 
-    // Render summary card
-    renderSummary(framework, auth, db, validation, configSaved);
-  } catch (error) {
-    // Graceful cancellation handling (Ctrl+C / Interruption)
-    console.log(
-      `\n${pc.red("✖")} ${pc.dim("Setup aborted. No changes were made.")}\n`,
+    // 4. Validation Selection
+    const validation = await select({
+      message: "Validation library",
+      choices: [
+        { value: "zod", name: "Zod", description: "TypeScript-first schema validation" },
+        { value: "skip", name: "Skip", description: "No validation library" }
+      ],
+      theme: inquirerTheme,
+    });
+
+    // 5. Shadcn Selection
+    const shadcn = await confirm({
+      message: "Configure Shadcn UI?",
+      default: true,
+      theme: inquirerTheme,
+    });
+
+    console.log("");
+
+    // Run Scaffolder
+    await generateProject(
+      {
+        projectName,
+        projectPath: targetPath,
+        framework: "nextjs",
+        auth,
+        db,
+        validation,
+        shadcn,
+      },
+      handleStepChange
     );
+
+    stopProgress(true);
+
+    // Final receipt
+    renderSummary("nextjs", auth, db, validation, shadcn, projectName, targetPath);
+
+  } catch (error: any) {
+    stopProgress(false);
+    // Graceful cancellation handling
+    console.log(`\n${pc.red("✖")} ${pc.dim("Setup aborted. No changes were made.")}\n`);
     process.exit(0);
   }
 }
 
 main().catch((err) => {
+  stopProgress(false);
   console.error("An error occurred:", err);
   process.exit(1);
 });
