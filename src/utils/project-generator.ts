@@ -217,7 +217,7 @@ export async function generateProject(
 function generateReadme(options: GeneratorOptions): string {
   const { projectName, auth, db, validation, shadcn } = options;
 
-  const stackItems: string[] = ["Next.js 15", "TypeScript", "Tailwind CSS v4"];
+  const stackItems: string[] = ["Next.js 16", "TypeScript", "Tailwind CSS v4"];
   if (shadcn) stackItems.push("Shadcn UI");
   if (auth === "better-auth") stackItems.push("Better Auth");
   else if (auth === "authjs") stackItems.push("Auth.js");
@@ -293,7 +293,7 @@ function generateReadme(options: GeneratorOptions): string {
     "├── .env",
     "├── .env.example",
     "├── next.config.ts",
-    "├── tailwind.config.ts",
+    "├── postcss.config.mjs",
     "├── tsconfig.json",
     "└── package.json"
   );
@@ -320,7 +320,7 @@ function generateReadme(options: GeneratorOptions): string {
 
   return `# ${projectName}
 
-A full-stack TypeScript application scaffolded with [g-stack](https://github.com/Grenish/create-fullstack-app).
+A full-stack TypeScript application scaffolded with [g-stack](https://github.com/Grenish/g-stack).
 
 ## Stack
 
