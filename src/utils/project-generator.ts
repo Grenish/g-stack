@@ -2,7 +2,7 @@ import path from "node:path";
 import { exec } from "node:child_process";
 import { promisify } from "node:util";
 import type { GeneratorOptions, TemplateFile } from "../types";
-import { baseTemplate, plainHomepage, shadcnHomepage } from "../templates/base";
+import { baseTemplate, plainHomepage, shadcnHomepage, plainNotFound, shadcnNotFound } from "../templates/base";
 import { dbTemplate } from "../templates/db";
 import {
   betterAuthTemplate,
@@ -57,6 +57,10 @@ export function stageProject(options: GeneratorOptions): StagedProject {
     homepage = homepage.replace(/href="\/signin"/g, 'href="/api/auth/login"');
   }
   files.set("app/page.tsx", homepage);
+
+  // Stage not-found page according to Shadcn UI selection
+  const notFound = options.shadcn ? shadcnNotFound : plainNotFound;
+  files.set("app/not-found.tsx", notFound);
 
   // Stage auth signin and signup pages only if we are using Better Auth or Auth.js (which we build custom pages for).
   // For Clerk, it renders its own routes inside signin/[[...signin]] and signup/[[...signup]].
@@ -244,7 +248,8 @@ export function stageProject(options: GeneratorOptions): StagedProject {
   files.set("README.md", generateReadme(options));
 
   // Post-process layout.tsx if shadcn is enabled to use preset fonts (Instrument Sans and Figtree)
-  if (options.shadcn) {
+  // Clerk and Auth0 layout templates already have the correct fonts baked in
+  if (options.shadcn && options.auth !== "clerk" && options.auth !== "auth0") {
     let layoutContent = files.get("app/layout.tsx") || "";
     if (layoutContent) {
       layoutContent = layoutContent
@@ -269,6 +274,10 @@ export function stageProject(options: GeneratorOptions): StagedProject {
         .replace(
           /\${geistSans\.variable}\s+\${geistMono\.variable}/g,
           "${fontSans.variable} ${fontHeading.variable}"
+        )
+        .replace(
+          /geistSans\.variable,\s*geistMono\.variable/g,
+          "fontSans.variable, fontHeading.variable"
         );
       files.set("app/layout.tsx", layoutContent);
     }
