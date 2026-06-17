@@ -26,5 +26,5 @@
     "noUnusedParameters": false,
     "noPropertyAccessFromIndexSignature": false
   },
-  "exclude": ["node_modules", "temp", "scratch"]
+  "exclude": ["node_modules", "temp", "scratch", "templates"]
 }
