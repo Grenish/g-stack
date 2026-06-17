@@ -3,74 +3,69 @@ import type { TemplateFile } from "../types";
 export const baseTemplate: TemplateFile[] = [
   {
     path: "package.json",
-    content: JSON.stringify(
-      {
-        name: "gstack-app",
-        version: "0.1.0",
-        private: true,
-        scripts: {
-          dev: "next dev",
-          build: "next build",
-          start: "next start",
-          lint: "next lint",
-        },
-        dependencies: {
-          next: "^16.2.9",
-          react: "^19.0.0",
-          "react-dom": "^19.0.0",
-        },
-        devDependencies: {
-          typescript: "^5.0.0",
-          "@types/node": "^20.0.0",
-          "@types/react": "^19.0.0",
-          "@types/react-dom": "^19.0.0",
-          postcss: "^8.4.0",
-          tailwindcss: "^4.0.0",
-          "@tailwindcss/postcss": "^4.0.0",
-        },
-      },
-      null,
-      2,
-    ),
+    content: `{
+  "name": "gstack-app",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint"
+  },
+  "dependencies": {
+    "next": "^16.2.9",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.0.0",
+    "@types/node": "^20.0.0",
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
+    "postcss": "^8.4.0",
+    "tailwindcss": "^4.0.0",
+    "@tailwindcss/postcss": "^4.0.0"
+  }
+}`
   },
   {
     path: "tsconfig.json",
-    content: JSON.stringify(
+    content: `{
+  "compilerOptions": {
+    "target": "ES2017",
+    "lib": ["dom", "dom.iterable", "esnext"],
+    "allowJs": true,
+    "skipLibCheck": true,
+    "strict": true,
+    "noEmit": true,
+    "esModuleInterop": true,
+    "module": "esnext",
+    "moduleResolution": "bundler",
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "jsx": "react-jsx",
+    "incremental": true,
+    "plugins": [
       {
-        compilerOptions: {
-          target: "ES2022",
-          lib: ["dom", "dom.iterable", "esnext"],
-          allowJs: true,
-          skipLibCheck: true,
-          strict: true,
-          noEmit: true,
-          esModuleInterop: true,
-          module: "esnext",
-          moduleResolution: "bundler",
-          resolveJsonModule: true,
-          isolatedModules: true,
-          jsx: "preserve",
-          incremental: true,
-          plugins: [
-            {
-              name: "next",
-            },
-          ],
-          paths: {
-            "@/*": ["./*"],
-          },
-        },
-        include: [
-          "next-env.d.ts",
-          "**/*.ts",
-          "**/*.tsx",
-          ".next/types/**/*.ts",
-        ],
-        exclude: ["node_modules"],
+        "name": "next",
       },
-      null,
-      2,
-    ),
+    ],
+    "paths": {
+      "@/*": ["./*"],
+    },
+  },
+  "include": [
+    "next-env.d.ts",
+    "**/*.ts",
+    "**/*.tsx",
+    ".next/types/**/*.ts",
+    ".next/dev/types/**/*.ts",
+    "**/*.mts",
+  ],
+  "exclude": ["node_modules"],
+}
+`
   },
   {
     path: "next.config.ts",
@@ -85,7 +80,7 @@ const nextConfig: NextConfig = {
 };
 
 export default nextConfig;
-`,
+`
   },
   {
     path: "postcss.config.mjs",
@@ -96,18 +91,19 @@ export default nextConfig;
 };
 
 export default postcssConfig;
-`,
+`
   },
   {
     path: "app/globals.css",
     content: `@import "tailwindcss";
-`,
+`
   },
   {
     path: "app/layout.tsx",
     content: `import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
+import { cn } from "@/lib/utils";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -130,15 +126,20 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className="dark">
-      <body className={\`\${geistSans.variable} \${geistMono.variable} antialiased bg-background text-foreground\`}>
+    <html
+      lang="en"
+      className={cn("font-sans", geistSans.variable, geistMono.variable)}
+    >
+      <body
+        className={\`\${geistSans.variable} \${geistMono.variable} antialiased bg-background text-foreground\`}
+      >
         {children}
       </body>
     </html>
   );
 }
-`,
-  },
+`
+  }
 ];
 
 export const plainHomepage = `export default function Home() {
@@ -206,80 +207,157 @@ export const plainHomepage = `export default function Home() {
 
 export const shadcnHomepage = `import { Button } from "@/components/ui/button";
 import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+  Item,
+  ItemActions,
+  ItemContent,
+  ItemMedia,
+  ItemTitle,
+} from "@/components/ui/item";
+import { Kbd } from "@/components/ui/kbd";
+import { KeyRound, LogIn, UserPlus } from "lucide-react";
+import Link from "next/link";
 
 export default function Home() {
   return (
-    <main className="flex min-h-dvh flex-col items-center justify-center bg-background px-6 py-12">
-      <div className="flex max-w-3xl w-full flex-col items-center gap-16 text-center">
-        <div className="flex flex-col items-center gap-5">
-          <div className="inline-flex items-center gap-2 rounded-full border border-border bg-muted/50 px-3 py-1 text-xs font-medium text-muted-foreground">
-            <span className="size-1.5 rounded-full bg-emerald-500" />
-            Scaffolded successfully
+    <div className="min-h-dvh">
+      <div className="w-xl min-h-dvh mx-auto flex flex-col items-start justify-center gap-2">
+        <div className="mb-5">
+          <h2 className="text-3xl font-black mb-2">g-stack</h2>
+          <p className="text-primary/70">
+            NextJs 16, BetterAuth, Docker, PostgreSQL, shadcn/ui
+          </p>
+        </div>
+        <p>
+          A production-ready Next.js starter with end-to-end type safety, modern
+          tooling, and batteries included.
+        </p>
+        <div className="w-full space-y-2 mb-3">
+          <h2 className="font-medium">Explore added routes</h2>
+          <Item variant={"outline"} size={"sm"}>
+            <ItemMedia variant="icon">
+              <LogIn />
+            </ItemMedia>
+            <ItemContent>
+              <ItemTitle>Sign in route</ItemTitle>
+            </ItemContent>
+            <ItemActions>
+              <Link href={"/signin"}>
+                <Button variant={"outline"} size={"xs"}>
+                  /signin
+                </Button>
+              </Link>
+            </ItemActions>
+          </Item>
+          <Item variant={"outline"} size={"sm"}>
+            <ItemMedia variant="icon">
+              <UserPlus />
+            </ItemMedia>
+            <ItemContent>
+              <ItemTitle>Sign up route</ItemTitle>
+            </ItemContent>
+            <ItemActions>
+              <Link href={"/signup"}>
+                <Button variant={"outline"} size={"xs"}>
+                  /signup
+                </Button>
+              </Link>
+            </ItemActions>
+          </Item>
+          <Item variant={"outline"} size={"sm"}>
+            <ItemMedia variant="icon">
+              <KeyRound />
+            </ItemMedia>
+            <ItemContent>
+              <ItemTitle>Reset password route</ItemTitle>
+            </ItemContent>
+            <ItemActions>
+              <Link href={"/reset-password"}>
+                <Button variant={"outline"} size={"xs"}>
+                  /reset-password
+                </Button>
+              </Link>
+            </ItemActions>
+          </Item>
+        </div>
+        <p>
+          To get started, edit the <Kbd>page.tsx</Kbd> file
+        </p>
+        <div className="mt-3">
+          <Link href={"https://nextjs.org/docs"} target="_blank">
+            <Button>Read docs</Button>
+          </Link>
+        </div>
+      </div>
+    </div>
+  );
+}
+`;
+
+export const plainNotFound = `import Link from "next/link";
+
+export default function NotFound() {
+  return (
+    <main className="flex min-h-dvh flex-col items-center justify-center bg-zinc-950 px-6 py-12">
+      <div className="flex max-w-md w-full flex-col items-center gap-8 text-center">
+        <div className="flex flex-col items-center gap-4">
+          <div className="inline-flex items-center gap-2 rounded-full border border-zinc-800 bg-zinc-900/60 px-3 py-1 text-xs font-medium text-zinc-400">
+            <span className="size-1.5 rounded-full bg-rose-500 animate-pulse" />
+            404 Error
           </div>
-          <h1 className="text-4xl font-bold tracking-tight sm:text-5xl">
-            Welcome to your g-stack app
+          <h1 className="text-4xl font-bold tracking-tight text-white sm:text-5xl">
+            Page not found
           </h1>
-          <p className="max-w-lg text-base leading-relaxed text-muted-foreground">
-            A production-ready Next.js application with type safety, modern
-            routing, and your selected stack.
+          <p className="text-base leading-relaxed text-zinc-400">
+            Sorry, we couldn't find the page you're looking for. It might have been moved or deleted.
           </p>
         </div>
 
-        <div className="grid w-full grid-cols-1 gap-4 text-left sm:grid-cols-3">
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-sm">App Router</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <CardDescription>
-                Server Components, Server Actions, and file-based routing.
-              </CardDescription>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-sm">Authentication</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <CardDescription>
-                Secure routes and API handlers with your chosen auth provider.
-              </CardDescription>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-sm">Database</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <CardDescription>
-                Type-safe data access powered by PostgreSQL and Prisma ORM.
-              </CardDescription>
-            </CardContent>
-          </Card>
-        </div>
-
         <div className="flex items-center gap-3">
-          <a href="/signin">
-            <Button size="lg">Get started</Button>
-          </a>
-          <a
-            href="https://nextjs.org/docs"
-            target="_blank"
-            rel="noopener noreferrer"
+          <Link
+            href="/"
+            className="inline-flex h-10 items-center rounded-md bg-white px-6 text-sm font-medium text-zinc-950 transition-colors hover:bg-zinc-200"
           >
-            <Button variant="outline" size="lg">
-              Documentation
-            </Button>
-          </a>
+            Go back home
+          </Link>
         </div>
       </div>
     </main>
+  );
+}
+`;
+
+export const shadcnNotFound = `import {
+  Empty,
+  EmptyDescription,
+  EmptyHeader,
+  EmptyMedia,
+  EmptyTitle,
+} from "@/components/ui/empty";
+
+export default function NotFound() {
+  return (
+    <div className="min-h-dvh w-full flex items-center justify-center">
+      <Empty>
+        <EmptyHeader>
+          <EmptyMedia variant={"icon"}>
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="32"
+              height="32"
+              fill="currentColor"
+              viewBox="0 0 256 256"
+            >
+              <path d="M176,140a12,12,0,1,1-12-12A12,12,0,0,1,176,140ZM128,92a12,12,0,1,0-12,12A12,12,0,0,0,128,92Zm73-38A104,104,0,0,0,50.48,197.33,8,8,0,1,0,62.4,186.66a88,88,0,1,1,131.19,0,8,8,0,0,0,11.93,10.67A104,104,0,0,0,201,54ZM152,168H136c-21.74,0-48-17.84-48-40a41.33,41.33,0,0,1,.55-6.68,8,8,0,1,0-15.78-2.64A56.9,56.9,0,0,0,72,128c0,14.88,7.46,29.13,21,40.15C105.4,178.22,121.07,184,136,184h16a8,8,0,0,1,0,16H96a24,24,0,0,0,0,48,8,8,0,0,0,0-16,8,8,0,0,1,0-16h56a24,24,0,0,0,0-48Z"></path>
+            </svg>
+          </EmptyMedia>
+          <EmptyTitle>Looks Like You&apos;re Lost</EmptyTitle>
+          <EmptyDescription>
+            The page you&apos;re trying to access doesn&apos;t exist or is no
+            longer available.
+          </EmptyDescription>
+        </EmptyHeader>
+      </Empty>
+    </div>
   );
 }
 `;
