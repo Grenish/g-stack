@@ -3,35 +3,32 @@ import type { TemplateFile } from "../types";
 export const shadcnTemplate: TemplateFile[] = [
   {
     path: "components.json",
-    content: JSON.stringify(
-      {
-        $schema: "https://ui.shadcn.com/schema.json",
-        style: "radix-rhea",
-        rsc: true,
-        tsx: true,
-        tailwind: {
-          config: "",
-          css: "app/globals.css",
-          baseColor: "neutral",
-          cssVariables: true,
-          prefix: "",
-        },
-        iconLibrary: "lucide",
-        rtl: false,
-        aliases: {
-          components: "@/components",
-          utils: "@/lib/utils",
-          ui: "@/components/ui",
-          lib: "@/lib",
-          hooks: "@/hooks",
-        },
-        menuColor: "default-translucent",
-        menuAccent: "subtle",
-        registries: {},
-      },
-      null,
-      2,
-    ),
+    content: `{
+  "$schema": "https://ui.shadcn.com/schema.json",
+  "style": "radix-rhea",
+  "rsc": true,
+  "tsx": true,
+  "tailwind": {
+    "config": "",
+    "css": "app/globals.css",
+    "baseColor": "neutral",
+    "cssVariables": true,
+    "prefix": ""
+  },
+  "iconLibrary": "lucide",
+  "rtl": false,
+  "aliases": {
+    "components": "@/components",
+    "utils": "@/lib/utils",
+    "ui": "@/components/ui",
+    "lib": "@/lib",
+    "hooks": "@/hooks"
+  },
+  "menuColor": "default-translucent",
+  "menuAccent": "subtle",
+  "registries": {}
+}
+`
   },
   {
     path: "lib/utils.ts",
@@ -41,7 +38,7 @@ import { twMerge } from "tailwind-merge";
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
-`,
+`
   },
   {
     path: "components/ui/button.tsx",
@@ -110,58 +107,7 @@ function Button({
 }
 
 export { Button, buttonVariants }
-`,
-  },
-  {
-    path: "components/ui/input.tsx",
-    content: `import * as React from "react"
-
-import { cn } from "@/lib/utils"
-
-function Input({ className, type, ...props }: React.ComponentProps<"input">) {
-  return (
-    <input
-      type={type}
-      data-slot="input"
-      className={cn(
-        "h-8 w-full min-w-0 rounded-2xl border border-transparent bg-input/50 px-2.5 py-1 text-base transition-[color,box-shadow] duration-200 outline-none file:inline-flex file:h-6 file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/30 disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-3 aria-invalid:ring-destructive/20 md:text-sm dark:aria-invalid:border-destructive/50 dark:aria-invalid:ring-destructive/40",
-        className
-      )}
-      {...props}
-    />
-  )
-}
-
-export { Input }
-`,
-  },
-  {
-    path: "components/ui/label.tsx",
-    content: `"use client"
-
-import * as React from "react"
-import { Label as LabelPrimitive } from "radix-ui"
-
-import { cn } from "@/lib/utils"
-
-function Label({
-  className,
-  ...props
-}: React.ComponentProps<typeof LabelPrimitive.Root>) {
-  return (
-    <LabelPrimitive.Root
-      data-slot="label"
-      className={cn(
-        "flex items-center gap-2 text-sm leading-none font-medium select-none group-data-[disabled=true]:pointer-events-none group-data-[disabled=true]:opacity-50 peer-disabled:cursor-not-allowed peer-disabled:opacity-50",
-        className
-      )}
-      {...props}
-    />
-  )
-}
-
-export { Label }
-`,
+`
   },
   {
     path: "components/ui/card.tsx",
@@ -265,256 +211,852 @@ export {
   CardDescription,
   CardContent,
 }
-`,
+`
   },
   {
-    path: "components/ui/field.tsx",
-    content: `import * as React from "react"
-import { cn } from "@/lib/utils"
-
-export interface FieldGroupProps extends React.HTMLAttributes<HTMLDivElement> {}
-
-export const FieldGroup = React.forwardRef<HTMLDivElement, FieldGroupProps>(
-  ({ className, ...props }, ref) => {
-    return (
-      <div
-        ref={ref}
-        className={cn("flex flex-col gap-4", className)}
-        {...props}
-      />
-    )
-  }
-)
-FieldGroup.displayName = "FieldGroup"
-
-export interface FieldProps extends React.HTMLAttributes<HTMLDivElement> {
-  orientation?: "horizontal" | "vertical"
-}
-
-export const Field = React.forwardRef<HTMLDivElement, FieldProps>(
-  ({ className, orientation = "vertical", ...props }, ref) => {
-    return (
-      <div
-        ref={ref}
-        className={cn(
-          "flex gap-1.5",
-          orientation === "vertical" ? "flex-col" : "flex-row items-center justify-between",
-          className
-        )}
-        {...props}
-      />
-    )
-  }
-)
-Field.displayName = "Field"
-
-export interface FieldLabelProps extends React.LabelHTMLAttributes<HTMLLabelElement> {}
-
-export const FieldLabel = React.forwardRef<HTMLLabelElement, FieldLabelProps>(
-  ({ className, ...props }, ref) => {
-    return (
-      <label
-        ref={ref}
-        className={cn(
-          "text-sm font-medium leading-none text-foreground peer-disabled:cursor-not-allowed peer-disabled:opacity-70",
-          className
-        )}
-        {...props}
-      />
-    )
-  }
-)
-FieldLabel.displayName = "FieldLabel"
-
-export interface FieldDescriptionProps extends React.HTMLAttributes<HTMLParagraphElement> {}
-
-export const FieldDescription = React.forwardRef<HTMLParagraphElement, FieldDescriptionProps>(
-  ({ className, ...props }, ref) => {
-    return (
-      <p
-        ref={ref}
-        className={cn("text-xs text-muted-foreground", className)}
-        {...props}
-      />
-    )
-  }
-)
-FieldDescription.displayName = "FieldDescription"
-
-export interface FieldSetProps extends React.HTMLAttributes<HTMLFieldSetElement> {}
-
-export const FieldSet = React.forwardRef<HTMLFieldSetElement, FieldSetProps>(
-  ({ className, ...props }, ref) => {
-    return (
-      <fieldset
-        ref={ref}
-        className={cn("flex flex-col gap-6", className)}
-        {...props}
-      />
-    )
-  }
-)
-FieldSet.displayName = "FieldSet"
-
-export interface FieldSeparatorProps extends React.HTMLAttributes<HTMLDivElement> {}
-
-export const FieldSeparator = React.forwardRef<HTMLDivElement, FieldSeparatorProps>(
-  ({ className, ...props }, ref) => {
-    return (
-      <div
-        ref={ref}
-        className={cn("h-px w-full bg-border", className)}
-        {...props}
-      />
-    )
-  }
-)
-FieldSeparator.displayName = "FieldSeparator"
-`,
-  },
-  {
-    path: "components/ui/input-group.tsx",
-    content: `import * as React from "react"
-import { cn } from "@/lib/utils"
-
-export interface InputGroupProps extends React.HTMLAttributes<HTMLDivElement> {}
-
-export const InputGroup = React.forwardRef<HTMLDivElement, InputGroupProps>(
-  ({ className, ...props }, ref) => {
-    return (
-      <div
-        ref={ref}
-        className={cn(
-          "flex h-8 w-full rounded-2xl border border-transparent bg-input/50 text-base transition-[color,box-shadow] duration-200 outline-none items-center overflow-hidden focus-within:border-ring focus-within:ring-3 focus-within:ring-ring/30 md:text-sm",
-          className
-        )}
-        {...props}
-      />
-    )
-  }
-)
-InputGroup.displayName = "InputGroup"
-
-export interface InputGroupInputProps extends React.InputHTMLAttributes<HTMLInputElement> {}
-
-export const InputGroupInput = React.forwardRef<HTMLInputElement, InputGroupInputProps>(
-  ({ className, type, ...props }, ref) => {
-    return (
-      <input
-        ref={ref}
-        type={type}
-        className={cn(
-          "flex h-full w-full bg-transparent px-2.5 py-1 text-base placeholder:text-muted-foreground focus:outline-none disabled:cursor-not-allowed disabled:opacity-50 md:text-sm",
-          className
-        )}
-        {...props}
-      />
-    )
-  }
-)
-InputGroupInput.displayName = "InputGroupInput"
-
-export interface InputGroupAddonProps extends React.HTMLAttributes<HTMLDivElement> {
-  align?: "inline-start" | "inline-end"
-}
-
-export const InputGroupAddon = React.forwardRef<HTMLDivElement, InputGroupAddonProps>(
-  ({ className, align = "inline-start", ...props }, ref) => {
-    return (
-      <div
-        ref={ref}
-        className={cn(
-          "flex items-center justify-center text-muted-foreground px-2.5 select-none h-full",
-          className
-        )}
-        {...props}
-      />
-    )
-  }
-)
-InputGroupAddon.displayName = "InputGroupAddon"
-
-export interface InputGroupButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {}
-
-export const InputGroupButton = React.forwardRef<HTMLButtonElement, InputGroupButtonProps>(
-  ({ className, type = "button", ...props }, ref) => {
-    return (
-      <button
-        ref={ref}
-        type={type}
-        className={cn(
-          "flex items-center justify-center text-muted-foreground hover:text-foreground focus:outline-none transition-colors h-full px-2.5",
-          className
-        )}
-        {...props}
-      />
-    )
-  }
-)
-InputGroupButton.displayName = "InputGroupButton"
-`,
-  },
-  {
-    path: "components/ui/tooltip.tsx",
-    content: `"use client"
-
-import * as React from "react"
-import { Tooltip as TooltipPrimitive } from "radix-ui"
+    path: "components/ui/empty.tsx",
+    content: `import { cva, type VariantProps } from "class-variance-authority"
 
 import { cn } from "@/lib/utils"
 
-function TooltipProvider({
-  delayDuration = 0,
-  ...props
-}: React.ComponentProps<typeof TooltipPrimitive.Provider>) {
+function Empty({ className, ...props }: React.ComponentProps<"div">) {
   return (
-    <TooltipPrimitive.Provider
-      data-slot="tooltip-provider"
-      delayDuration={delayDuration}
+    <div
+      data-slot="empty"
+      className={cn(
+        "flex w-full min-w-0 flex-1 flex-col items-center justify-center gap-4 rounded-3xl border-dashed p-12 text-center text-balance",
+        className
+      )}
       {...props}
     />
   )
 }
 
-function Tooltip({
-  ...props
-}: React.ComponentProps<typeof TooltipPrimitive.Root>) {
-  return <TooltipPrimitive.Root data-slot="tooltip" {...props} />
-}
-
-function TooltipTrigger({
-  ...props
-}: React.ComponentProps<typeof TooltipPrimitive.Trigger>) {
-  return <TooltipPrimitive.Trigger data-slot="tooltip-trigger" {...props} />
-}
-
-function TooltipContent({
-  className,
-  sideOffset = 0,
-  children,
-  ...props
-}: React.ComponentProps<typeof TooltipPrimitive.Content>) {
+function EmptyHeader({ className, ...props }: React.ComponentProps<"div">) {
   return (
-    <TooltipPrimitive.Portal>
-      <TooltipPrimitive.Content
-        data-slot="tooltip-content"
-        sideOffset={sideOffset}
-        className={cn(
-          "z-50 inline-flex w-fit max-w-xs origin-(--radix-tooltip-content-transform-origin) items-center gap-1.5 rounded-xl bg-foreground px-3 py-1.5 text-xs text-background has-data-[slot=kbd]:pr-1.5 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2 **:data-[slot=kbd]:relative **:data-[slot=kbd]:isolate **:data-[slot=kbd]:z-50 **:data-[slot=kbd]:rounded-lg data-[state=delayed-open]:animate-in data-[state=delayed-open]:fade-in-0 data-[state=delayed-open]:zoom-in-95 data-open:animate-in data-open:fade-in-0 data-open:zoom-in-95 data-closed:animate-out data-closed:fade-out-0 data-closed:zoom-out-95",
-          className
-        )}
-        {...props}
-      >
-        {children}
-        <TooltipPrimitive.Arrow className="z-50 size-2.5 translate-y-[calc(-50%_-_2px)] rotate-45 rounded-[2px] bg-foreground fill-foreground data-[side=left]:translate-x-[-1.5px] data-[side=right]:translate-x-[1.5px]" />
-      </TooltipPrimitive.Content>
-    </TooltipPrimitive.Portal>
+    <div
+      data-slot="empty-header"
+      className={cn("flex max-w-sm flex-col items-center gap-2", className)}
+      {...props}
+    />
   )
 }
 
-export { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger }
-`,
+const emptyMediaVariants = cva(
+  "mb-2 flex shrink-0 items-center justify-center [&_svg]:pointer-events-none [&_svg]:shrink-0",
+  {
+    variants: {
+      variant: {
+        default: "bg-transparent",
+        icon: "flex size-10 shrink-0 items-center justify-center rounded-xl bg-muted text-foreground [&_svg:not([class*='size-'])]:size-5",
+      },
+    },
+    defaultVariants: {
+      variant: "default",
+    },
+  }
+)
+
+function EmptyMedia({
+  className,
+  variant = "default",
+  ...props
+}: React.ComponentProps<"div"> & VariantProps<typeof emptyMediaVariants>) {
+  return (
+    <div
+      data-slot="empty-icon"
+      data-variant={variant}
+      className={cn(emptyMediaVariants({ variant, className }))}
+      {...props}
+    />
+  )
+}
+
+function EmptyTitle({ className, ...props }: React.ComponentProps<"div">) {
+  return (
+    <div
+      data-slot="empty-title"
+      className={cn(
+        "font-heading text-lg font-medium tracking-tight",
+        className
+      )}
+      {...props}
+    />
+  )
+}
+
+function EmptyDescription({ className, ...props }: React.ComponentProps<"p">) {
+  return (
+    <div
+      data-slot="empty-description"
+      className={cn(
+        "text-sm/relaxed text-muted-foreground [&>a]:underline [&>a]:underline-offset-4 [&>a:hover]:text-primary",
+        className
+      )}
+      {...props}
+    />
+  )
+}
+
+function EmptyContent({ className, ...props }: React.ComponentProps<"div">) {
+  return (
+    <div
+      data-slot="empty-content"
+      className={cn(
+        "flex w-full max-w-sm min-w-0 flex-col items-center gap-4 text-sm text-balance",
+        className
+      )}
+      {...props}
+    />
+  )
+}
+
+export {
+  Empty,
+  EmptyHeader,
+  EmptyTitle,
+  EmptyDescription,
+  EmptyContent,
+  EmptyMedia,
+}
+`
   },
+  {
+    path: "components/ui/field.tsx",
+    content: `"use client"
+
+import { useMemo } from "react"
+import { cva, type VariantProps } from "class-variance-authority"
+
+import { cn } from "@/lib/utils"
+import { Label } from "@/components/ui/label"
+import { Separator } from "@/components/ui/separator"
+
+function FieldSet({ className, ...props }: React.ComponentProps<"fieldset">) {
+  return (
+    <fieldset
+      data-slot="field-set"
+      className={cn(
+        "flex flex-col gap-6 has-[>[data-slot=checkbox-group]]:gap-3 has-[>[data-slot=radio-group]]:gap-3",
+        className
+      )}
+      {...props}
+    />
+  )
+}
+
+function FieldLegend({
+  className,
+  variant = "legend",
+  ...props
+}: React.ComponentProps<"legend"> & { variant?: "legend" | "label" }) {
+  return (
+    <legend
+      data-slot="field-legend"
+      data-variant={variant}
+      className={cn(
+        "mb-3 font-medium data-[variant=label]:text-sm data-[variant=legend]:text-base",
+        className
+      )}
+      {...props}
+    />
+  )
+}
+
+function FieldGroup({ className, ...props }: React.ComponentProps<"div">) {
+  return (
+    <div
+      data-slot="field-group"
+      className={cn(
+        "group/field-group @container/field-group flex w-full flex-col gap-6 data-[slot=checkbox-group]:gap-3 *:data-[slot=field-group]:gap-4",
+        className
+      )}
+      {...props}
+    />
+  )
+}
+
+const fieldVariants = cva(
+  "group/field flex w-full gap-3 data-[invalid=true]:text-destructive",
+  {
+    variants: {
+      orientation: {
+        vertical: "flex-col *:w-full [&>.sr-only]:w-auto",
+        horizontal:
+          "flex-row items-center has-[>[data-slot=field-content]]:items-start *:data-[slot=field-label]:flex-auto has-[>[data-slot=field-content]]:[&>[role=checkbox],[role=radio]]:mt-px",
+        responsive:
+          "flex-col *:w-full @md/field-group:flex-row @md/field-group:items-center @md/field-group:*:w-auto @md/field-group:has-[>[data-slot=field-content]]:items-start @md/field-group:*:data-[slot=field-label]:flex-auto [&>.sr-only]:w-auto @md/field-group:has-[>[data-slot=field-content]]:[&>[role=checkbox],[role=radio]]:mt-px",
+      },
+    },
+    defaultVariants: {
+      orientation: "vertical",
+    },
+  }
+)
+
+function Field({
+  className,
+  orientation = "vertical",
+  ...props
+}: React.ComponentProps<"div"> & VariantProps<typeof fieldVariants>) {
+  return (
+    <div
+      role="group"
+      data-slot="field"
+      data-orientation={orientation}
+      className={cn(fieldVariants({ orientation }), className)}
+      {...props}
+    />
+  )
+}
+
+function FieldContent({ className, ...props }: React.ComponentProps<"div">) {
+  return (
+    <div
+      data-slot="field-content"
+      className={cn(
+        "group/field-content flex flex-1 flex-col gap-1 leading-snug",
+        className
+      )}
+      {...props}
+    />
+  )
+}
+
+function FieldLabel({
+  className,
+  ...props
+}: React.ComponentProps<typeof Label>) {
+  return (
+    <Label
+      data-slot="field-label"
+      className={cn(
+        "group/field-label peer/field-label flex w-fit gap-2 leading-snug group-data-[disabled=true]/field:opacity-50 has-data-checked:bg-input/30 has-[>[data-slot=field]]:rounded-2xl has-[>[data-slot=field]]:border *:data-[slot=field]:p-4",
+        "has-[>[data-slot=field]]:w-full has-[>[data-slot=field]]:flex-col",
+        className
+      )}
+      {...props}
+    />
+  )
+}
+
+function FieldTitle({ className, ...props }: React.ComponentProps<"div">) {
+  return (
+    <div
+      data-slot="field-label"
+      className={cn(
+        "flex w-fit items-center gap-2 text-sm font-medium group-data-[disabled=true]/field:opacity-50",
+        className
+      )}
+      {...props}
+    />
+  )
+}
+
+function FieldDescription({ className, ...props }: React.ComponentProps<"p">) {
+  return (
+    <p
+      data-slot="field-description"
+      className={cn(
+        "text-left text-sm leading-normal font-normal text-muted-foreground group-has-data-horizontal/field:text-balance [[data-variant=legend]+&]:-mt-1.5",
+        "last:mt-0 nth-last-2:-mt-1",
+        "[&>a]:underline [&>a]:underline-offset-4 [&>a:hover]:text-primary",
+        className
+      )}
+      {...props}
+    />
+  )
+}
+
+function FieldSeparator({
+  children,
+  className,
+  ...props
+}: React.ComponentProps<"div"> & {
+  children?: React.ReactNode
+}) {
+  return (
+    <div
+      data-slot="field-separator"
+      data-content={!!children}
+      className={cn(
+        "relative -my-2 h-5 text-sm group-data-[variant=outline]/field-group:-mb-2",
+        className
+      )}
+      {...props}
+    >
+      <Separator className="absolute inset-0 top-1/2" />
+      {children && (
+        <span
+          className="relative mx-auto block w-fit bg-background px-2 text-muted-foreground"
+          data-slot="field-separator-content"
+        >
+          {children}
+        </span>
+      )}
+    </div>
+  )
+}
+
+function FieldError({
+  className,
+  children,
+  errors,
+  ...props
+}: React.ComponentProps<"div"> & {
+  errors?: Array<{ message?: string } | undefined>
+}) {
+  const content = useMemo(() => {
+    if (children) {
+      return children
+    }
+
+    if (!errors?.length) {
+      return null
+    }
+
+    const uniqueErrors = [
+      ...new Map(errors.map((error) => [error?.message, error])).values(),
+    ]
+
+    if (uniqueErrors?.length == 1) {
+      return uniqueErrors[0]?.message
+    }
+
+    return (
+      <ul className="ml-4 flex list-disc flex-col gap-1">
+        {uniqueErrors.map(
+          (error, index) =>
+            error?.message && <li key={index}>{error.message}</li>
+        )}
+      </ul>
+    )
+  }, [children, errors])
+
+  if (!content) {
+    return null
+  }
+
+  return (
+    <div
+      role="alert"
+      data-slot="field-error"
+      className={cn("text-sm font-normal text-destructive", className)}
+      {...props}
+    >
+      {content}
+    </div>
+  )
+}
+
+export {
+  Field,
+  FieldLabel,
+  FieldDescription,
+  FieldError,
+  FieldGroup,
+  FieldLegend,
+  FieldSeparator,
+  FieldSet,
+  FieldContent,
+  FieldTitle,
+}
+`
+  },
+  {
+    path: "components/ui/input.tsx",
+    content: `import * as React from "react"
+
+import { cn } from "@/lib/utils"
+
+function Input({ className, type, ...props }: React.ComponentProps<"input">) {
+  return (
+    <input
+      type={type}
+      data-slot="input"
+      className={cn(
+        "h-8 w-full min-w-0 rounded-2xl border border-transparent bg-input/50 px-2.5 py-1 text-base transition-[color,box-shadow] duration-200 outline-none file:inline-flex file:h-6 file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/30 disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-3 aria-invalid:ring-destructive/20 md:text-sm dark:aria-invalid:border-destructive/50 dark:aria-invalid:ring-destructive/40",
+        className
+      )}
+      {...props}
+    />
+  )
+}
+
+export { Input }
+`
+  },
+  {
+    path: "components/ui/input-group.tsx",
+    content: `"use client"
+
+import * as React from "react"
+import { cva, type VariantProps } from "class-variance-authority"
+
+import { cn } from "@/lib/utils"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Textarea } from "@/components/ui/textarea"
+
+function InputGroup({ className, ...props }: React.ComponentProps<"div">) {
+  return (
+    <div
+      data-slot="input-group"
+      role="group"
+      className={cn(
+        "group/input-group relative flex h-8 w-full min-w-0 items-center rounded-2xl border border-transparent bg-input/50 transition-[color,box-shadow] duration-200 outline-none in-data-[slot=combobox-content]:focus-within:border-inherit in-data-[slot=combobox-content]:focus-within:ring-0 has-[[data-slot=input-group-control]:focus-visible]:border-ring has-[[data-slot=input-group-control]:focus-visible]:ring-3 has-[[data-slot=input-group-control]:focus-visible]:ring-ring/30 has-[[data-slot][aria-invalid=true]]:border-destructive has-[[data-slot][aria-invalid=true]]:ring-3 has-[[data-slot][aria-invalid=true]]:ring-destructive/20 has-[>[data-align=block-end]]:h-auto has-[>[data-align=block-end]]:flex-col has-[>[data-align=block-start]]:h-auto has-[>[data-align=block-start]]:flex-col has-[>textarea]:h-auto dark:has-[[data-slot][aria-invalid=true]]:ring-destructive/40 has-[>[data-align=block-end]]:[&>input]:pt-3 has-[>[data-align=block-start]]:[&>input]:pb-3 has-[>[data-align=inline-end]]:[&>input]:pr-1.5 has-[>[data-align=inline-start]]:[&>input]:pl-1.5",
+        className
+      )}
+      {...props}
+    />
+  )
+}
+
+const inputGroupAddonVariants = cva(
+  "flex h-auto cursor-text items-center justify-center gap-2 py-1.5 text-sm font-medium text-muted-foreground select-none group-data-[disabled=true]/input-group:opacity-50 **:data-[slot=kbd]:rounded-2xl **:data-[slot=kbd]:bg-muted-foreground/10 **:data-[slot=kbd]:px-1.5 [&>svg:not([class*='size-'])]:size-4",
+  {
+    variants: {
+      align: {
+        "inline-start":
+          "order-first pl-2 has-[>button]:ml-[-0.3rem] has-[>kbd]:ml-[-0.15rem]",
+        "inline-end":
+          "order-last pr-2 has-[>button]:mr-[-0.3rem] has-[>kbd]:mr-[-0.15rem]",
+        "block-start":
+          "order-first w-full justify-start px-2.5 pt-2 group-has-[>input]/input-group:pt-2 [.border-b]:pb-2",
+        "block-end":
+          "order-last w-full justify-start px-2.5 pb-2 group-has-[>input]/input-group:pb-2 [.border-t]:pt-2",
+      },
+    },
+    defaultVariants: {
+      align: "inline-start",
+    },
+  }
+)
+
+function InputGroupAddon({
+  className,
+  align = "inline-start",
+  ...props
+}: React.ComponentProps<"div"> & VariantProps<typeof inputGroupAddonVariants>) {
+  return (
+    <div
+      role="group"
+      data-slot="input-group-addon"
+      data-align={align}
+      className={cn(inputGroupAddonVariants({ align }), className)}
+      onClick={(e) => {
+        if ((e.target as HTMLElement).closest("button")) {
+          return
+        }
+        e.currentTarget.parentElement?.querySelector("input")?.focus()
+      }}
+      {...props}
+    />
+  )
+}
+
+const inputGroupButtonVariants = cva(
+  "flex items-center gap-2 rounded-2xl text-sm shadow-none",
+  {
+    variants: {
+      size: {
+        xs: "h-6 gap-1 rounded-xl px-1.5 [&>svg:not([class*='size-'])]:size-3.5",
+        sm: "",
+        "icon-xs": "size-6 rounded-xl p-0 has-[>svg]:p-0",
+        "icon-sm": "size-8 p-0 has-[>svg]:p-0",
+      },
+    },
+    defaultVariants: {
+      size: "xs",
+    },
+  }
+)
+
+function InputGroupButton({
+  className,
+  type = "button",
+  variant = "ghost",
+  size = "xs",
+  ...props
+}: Omit<React.ComponentProps<typeof Button>, "size"> &
+  VariantProps<typeof inputGroupButtonVariants>) {
+  return (
+    <Button
+      type={type}
+      data-size={size}
+      variant={variant}
+      className={cn(inputGroupButtonVariants({ size }), className)}
+      {...props}
+    />
+  )
+}
+
+function InputGroupText({ className, ...props }: React.ComponentProps<"span">) {
+  return (
+    <span
+      className={cn(
+        "flex items-center gap-2 text-sm text-muted-foreground [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4",
+        className
+      )}
+      {...props}
+    />
+  )
+}
+
+function InputGroupInput({
+  className,
+  ...props
+}: React.ComponentProps<"input">) {
+  return (
+    <Input
+      data-slot="input-group-control"
+      className={cn(
+        "flex-1 rounded-none border-0 bg-transparent shadow-none ring-0 focus-visible:ring-0 aria-invalid:ring-0 dark:bg-transparent",
+        className
+      )}
+      {...props}
+    />
+  )
+}
+
+function InputGroupTextarea({
+  className,
+  ...props
+}: React.ComponentProps<"textarea">) {
+  return (
+    <Textarea
+      data-slot="input-group-control"
+      className={cn(
+        "flex-1 resize-none rounded-none border-0 bg-transparent py-2 shadow-none ring-0 focus-visible:ring-0 aria-invalid:ring-0 dark:bg-transparent",
+        className
+      )}
+      {...props}
+    />
+  )
+}
+
+export {
+  InputGroup,
+  InputGroupAddon,
+  InputGroupButton,
+  InputGroupText,
+  InputGroupInput,
+  InputGroupTextarea,
+}
+`
+  },
+  {
+    path: "components/ui/item.tsx",
+    content: `import * as React from "react"
+import { cva, type VariantProps } from "class-variance-authority"
+import { Slot } from "radix-ui"
+
+import { cn } from "@/lib/utils"
+import { Separator } from "@/components/ui/separator"
+
+function ItemGroup({ className, ...props }: React.ComponentProps<"div">) {
+  return (
+    <div
+      role="list"
+      data-slot="item-group"
+      className={cn(
+        "group/item-group flex w-full flex-col gap-4 has-data-[size=sm]:gap-2.5 has-data-[size=xs]:gap-2",
+        className
+      )}
+      {...props}
+    />
+  )
+}
+
+function ItemSeparator({
+  className,
+  ...props
+}: React.ComponentProps<typeof Separator>) {
+  return (
+    <Separator
+      data-slot="item-separator"
+      orientation="horizontal"
+      className={cn("my-2", className)}
+      {...props}
+    />
+  )
+}
+
+const itemVariants = cva(
+  "group/item flex w-full flex-wrap items-center rounded-2xl border text-sm transition-colors duration-100 outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 [a]:transition-colors [a]:hover:bg-muted",
+  {
+    variants: {
+      variant: {
+        default: "border-transparent",
+        outline: "border-border",
+        muted: "border-transparent bg-muted/50",
+      },
+      size: {
+        default: "gap-3.5 px-4 py-3.5",
+        sm: "gap-3.5 px-3.5 py-3",
+        xs: "gap-2 px-2.5 py-2 in-data-[slot=dropdown-menu-content]:p-0",
+      },
+    },
+    defaultVariants: {
+      variant: "default",
+      size: "default",
+    },
+  }
+)
+
+function Item({
+  className,
+  variant = "default",
+  size = "default",
+  asChild = false,
+  ...props
+}: React.ComponentProps<"div"> &
+  VariantProps<typeof itemVariants> & { asChild?: boolean }) {
+  const Comp = asChild ? Slot.Root : "div"
+  return (
+    <Comp
+      data-slot="item"
+      data-variant={variant}
+      data-size={size}
+      className={cn(itemVariants({ variant, size, className }))}
+      {...props}
+    />
+  )
+}
+
+const itemMediaVariants = cva(
+  "flex shrink-0 items-center justify-center gap-2 group-has-data-[slot=item-description]/item:translate-y-0.5 group-has-data-[slot=item-description]/item:self-start [&_svg]:pointer-events-none",
+  {
+    variants: {
+      variant: {
+        default: "bg-transparent",
+        icon: "[&_svg:not([class*='size-'])]:size-4",
+        image:
+          "size-10 overflow-hidden rounded-xl group-data-[size=sm]/item:size-8 group-data-[size=xs]/item:size-6 group-data-[size=xs]/item:rounded-lg [&_img]:size-full [&_img]:object-cover",
+      },
+    },
+    defaultVariants: {
+      variant: "default",
+    },
+  }
+)
+
+function ItemMedia({
+  className,
+  variant = "default",
+  ...props
+}: React.ComponentProps<"div"> & VariantProps<typeof itemMediaVariants>) {
+  return (
+    <div
+      data-slot="item-media"
+      data-variant={variant}
+      className={cn(itemMediaVariants({ variant, className }))}
+      {...props}
+    />
+  )
+}
+
+function ItemContent({ className, ...props }: React.ComponentProps<"div">) {
+  return (
+    <div
+      data-slot="item-content"
+      className={cn(
+        "flex flex-1 flex-col gap-1 group-data-[size=xs]/item:gap-0.5 [&+[data-slot=item-content]]:flex-none",
+        className
+      )}
+      {...props}
+    />
+  )
+}
+
+function ItemTitle({ className, ...props }: React.ComponentProps<"div">) {
+  return (
+    <div
+      data-slot="item-title"
+      className={cn(
+        "line-clamp-1 flex w-fit items-center gap-2 text-sm leading-snug font-medium underline-offset-4",
+        className
+      )}
+      {...props}
+    />
+  )
+}
+
+function ItemDescription({ className, ...props }: React.ComponentProps<"p">) {
+  return (
+    <p
+      data-slot="item-description"
+      className={cn(
+        "line-clamp-2 text-left text-sm font-normal text-muted-foreground [&>a]:underline [&>a]:underline-offset-4 [&>a:hover]:text-primary",
+        className
+      )}
+      {...props}
+    />
+  )
+}
+
+function ItemActions({ className, ...props }: React.ComponentProps<"div">) {
+  return (
+    <div
+      data-slot="item-actions"
+      className={cn("flex items-center gap-2", className)}
+      {...props}
+    />
+  )
+}
+
+function ItemHeader({ className, ...props }: React.ComponentProps<"div">) {
+  return (
+    <div
+      data-slot="item-header"
+      className={cn(
+        "flex basis-full items-center justify-between gap-2",
+        className
+      )}
+      {...props}
+    />
+  )
+}
+
+function ItemFooter({ className, ...props }: React.ComponentProps<"div">) {
+  return (
+    <div
+      data-slot="item-footer"
+      className={cn(
+        "flex basis-full items-center justify-between gap-2",
+        className
+      )}
+      {...props}
+    />
+  )
+}
+
+export {
+  Item,
+  ItemMedia,
+  ItemContent,
+  ItemActions,
+  ItemGroup,
+  ItemSeparator,
+  ItemTitle,
+  ItemDescription,
+  ItemHeader,
+  ItemFooter,
+}
+`
+  },
+  {
+    path: "components/ui/kbd.tsx",
+    content: `import { cn } from "@/lib/utils"
+
+function Kbd({ className, ...props }: React.ComponentProps<"kbd">) {
+  return (
+    <kbd
+      data-slot="kbd"
+      className={cn(
+        "pointer-events-none inline-flex h-5 w-fit min-w-5 items-center justify-center gap-1 rounded-lg bg-muted px-1 font-sans text-xs font-medium text-muted-foreground select-none in-data-[slot=input-group]:bg-input in-data-[slot=tooltip-content]:bg-background/20 in-data-[slot=tooltip-content]:text-background dark:in-data-[slot=tooltip-content]:bg-background/10 [&_svg:not([class*='size-'])]:size-3",
+        className
+      )}
+      {...props}
+    />
+  )
+}
+
+function KbdGroup({ className, ...props }: React.ComponentProps<"div">) {
+  return (
+    <kbd
+      data-slot="kbd-group"
+      className={cn("inline-flex items-center gap-1", className)}
+      {...props}
+    />
+  )
+}
+
+export { Kbd, KbdGroup }
+`
+  },
+  {
+    path: "components/ui/label.tsx",
+    content: `"use client"
+
+import * as React from "react"
+import { Label as LabelPrimitive } from "radix-ui"
+
+import { cn } from "@/lib/utils"
+
+function Label({
+  className,
+  ...props
+}: React.ComponentProps<typeof LabelPrimitive.Root>) {
+  return (
+    <LabelPrimitive.Root
+      data-slot="label"
+      className={cn(
+        "flex items-center gap-2 text-sm leading-none font-medium select-none group-data-[disabled=true]:pointer-events-none group-data-[disabled=true]:opacity-50 peer-disabled:cursor-not-allowed peer-disabled:opacity-50",
+        className
+      )}
+      {...props}
+    />
+  )
+}
+
+export { Label }
+`
+  },
+  {
+    path: "components/ui/separator.tsx",
+    content: `"use client"
+
+import * as React from "react"
+import { Separator as SeparatorPrimitive } from "radix-ui"
+
+import { cn } from "@/lib/utils"
+
+function Separator({
+  className,
+  orientation = "horizontal",
+  decorative = true,
+  ...props
+}: React.ComponentProps<typeof SeparatorPrimitive.Root>) {
+  return (
+    <SeparatorPrimitive.Root
+      data-slot="separator"
+      decorative={decorative}
+      orientation={orientation}
+      className={cn(
+        "shrink-0 bg-border data-horizontal:h-px data-horizontal:w-full data-vertical:w-px data-vertical:self-stretch",
+        className
+      )}
+      {...props}
+    />
+  )
+}
+
+export { Separator }
+`
+  },
+  {
+    path: "components/ui/textarea.tsx",
+    content: `import * as React from "react"
+
+import { cn } from "@/lib/utils"
+
+function Textarea({ className, ...props }: React.ComponentProps<"textarea">) {
+  return (
+    <textarea
+      data-slot="textarea"
+      className={cn(
+        "flex field-sizing-content min-h-16 w-full resize-none rounded-2xl border border-transparent bg-input/50 px-2.5 py-2 text-base transition-[color,box-shadow] duration-200 outline-none placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/30 disabled:cursor-not-allowed disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-3 aria-invalid:ring-destructive/20 md:text-sm dark:aria-invalid:border-destructive/50 dark:aria-invalid:ring-destructive/40",
+        className
+      )}
+      {...props}
+    />
+  )
+}
+
+export { Textarea }
+`
+  }
 ];
 
 export const shadcnCssThemeSnippet = `
