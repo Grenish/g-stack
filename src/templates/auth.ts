@@ -274,28 +274,18 @@ export const config = {
   }
 ];
 
-export const auth0Template: TemplateFile[] = [
-  {
-    path: "app/api/auth/[auth0]/route.ts",
-    content: `import { handleAuth } from "@auth0/nextjs-auth0";
-
-export const GET = handleAuth();
-`
-  }
-];
-
 export const clerkLayoutTemplate = `import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Instrument_Sans, Figtree } from "next/font/google";
 import { ClerkProvider } from "@clerk/nextjs";
 import "./globals.css";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+const fontSans = Instrument_Sans({
+  variable: "--font-sans",
   subsets: ["latin"],
 });
 
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
+const fontHeading = Figtree({
+  variable: "--font-heading",
   subsets: ["latin"],
 });
 
@@ -311,8 +301,8 @@ export default function RootLayout({
 }>) {
   return (
     <ClerkProvider>
-      <html lang="en" className="dark">
-        <body className={\`\${geistSans.variable} \${geistMono.variable} antialiased bg-background text-foreground\`}>
+      <html lang="en">
+        <body className={\`\${fontSans.variable} \${fontHeading.variable} antialiased bg-background text-foreground\`}>
           {children}
         </body>
       </html>
@@ -321,18 +311,28 @@ export default function RootLayout({
 }
 `;
 
+export const auth0Template: TemplateFile[] = [
+  {
+    path: "app/api/auth/[auth0]/route.ts",
+    content: `import { handleAuth } from "@auth0/nextjs-auth0";
+
+export const GET = handleAuth();
+`
+  }
+];
+
 export const auth0LayoutTemplate = `import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Instrument_Sans, Figtree } from "next/font/google";
 import { UserProvider } from "@auth0/nextjs-auth0/client";
 import "./globals.css";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+const fontSans = Instrument_Sans({
+  variable: "--font-sans",
   subsets: ["latin"],
 });
 
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
+const fontHeading = Figtree({
+  variable: "--font-heading",
   subsets: ["latin"],
 });
 
@@ -347,9 +347,9 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className="dark">
+    <html lang="en">
       <UserProvider>
-        <body className={\`\${geistSans.variable} \${geistMono.variable} antialiased bg-background text-foreground\`}>
+        <body className={\`\${fontSans.variable} \${fontHeading.variable} antialiased bg-background text-foreground\`}>
           {children}
         </body>
       </UserProvider>
@@ -357,4 +357,3 @@ export default function RootLayout({
   );
 }
 `;
-
