@@ -10,7 +10,9 @@
     "@types/bun": "latest"
   },
   "scripts": {
-    "dev": "bun run src/index.ts"
+    "compile-templates": "bun run scripts/compile-templates.ts",
+    "dev": "bun run compile-templates && bun run src/index.ts",
+    "build": "bun run compile-templates"
   },
   "peerDependencies": {
     "typescript": "^5"
