@@ -142,65 +142,68 @@ export default function RootLayout({
   }
 ];
 
-export const plainHomepage = `export default function Home() {
+export const plainHomepage = `import { KeyRound, LogIn, UserPlus } from "lucide-react";
+import Link from "next/link";
+import React from "react";
+
+export default function Home() {
+  const links = [
+    { href: "/signin", label: "Sign in route", icon: LogIn },
+    { href: "/signup", label: "Sign up route", icon: UserPlus },
+    { href: "/reset-password", label: "Reset password route", icon: KeyRound },
+  ];
+
   return (
-    <main className="flex min-h-dvh flex-col items-center justify-center bg-zinc-950 px-6 py-12">
-      <div className="flex max-w-3xl w-full flex-col items-center gap-16 text-center">
-        <div className="flex flex-col items-center gap-5">
-          <div className="inline-flex items-center gap-2 rounded-full border border-zinc-800 bg-zinc-900/60 px-3 py-1 text-xs font-medium text-zinc-400">
-            <span className="size-1.5 rounded-full bg-emerald-500" />
-            Scaffolded successfully
-          </div>
-          <h1 className="text-4xl font-bold tracking-tight text-white sm:text-5xl">
-            Welcome to your g-stack app
-          </h1>
-          <p className="max-w-lg text-base leading-relaxed text-zinc-400">
-            A production-ready Next.js application with type safety, modern
-            routing, and your selected stack.
+    <div className="min-h-dvh">
+      <div className="w-xl min-h-dvh mx-auto flex flex-col items-start justify-center gap-2">
+        <div className="mb-5">
+          <h2 className="text-3xl font-black mb-2">g-stack</h2>
+          <p className="text-gray-500">
+            NextJs 16, BetterAuth, Docker, PostgreSQL
           </p>
         </div>
+        <p>
+          A production-ready Next.js starter with end-to-end type safety, modern
+          tooling, and batteries included.
+        </p>
+        <div className="w-full space-y-2 mb-3">
+          <h2 className="font-medium">Explore added routes</h2>
 
-        <div className="grid w-full grid-cols-1 gap-px overflow-hidden rounded-lg border border-zinc-800 bg-zinc-800 sm:grid-cols-3">
-          <div className="flex flex-col gap-2 bg-zinc-950 p-6">
-            <h2 className="text-sm font-semibold text-white">App Router</h2>
-            <p className="text-sm leading-relaxed text-zinc-400">
-              Server Components, Server Actions, and file-based routing.
-            </p>
-          </div>
-          <div className="flex flex-col gap-2 bg-zinc-950 p-6">
-            <h2 className="text-sm font-semibold text-white">
-              Authentication
-            </h2>
-            <p className="text-sm leading-relaxed text-zinc-400">
-              Secure routes and API handlers with your chosen auth provider.
-            </p>
-          </div>
-          <div className="flex flex-col gap-2 bg-zinc-950 p-6">
-            <h2 className="text-sm font-semibold text-white">Database</h2>
-            <p className="text-sm leading-relaxed text-zinc-400">
-              Type-safe data access powered by PostgreSQL and Prisma ORM.
-            </p>
-          </div>
+          {links.map((link) => (
+            <div
+              key={link.href}
+              className="w-full flex items-center text-sm justify-between border border-gray-200 rounded-xl p-2.5 px-3.5"
+            >
+              <div className="flex items-center gap-3.5">
+                {link.icon && React.createElement(link.icon, { size: 16 })}
+                <div>{link.label}</div>
+              </div>
+              <div>
+                <Link href={link.href}>
+                  <button className="h-7 gap-1 px-3 has-data-[icon=inline-end]:pr-2 has-data-[icon=inline-start]:pl-2 border border-gray-200 hover:bg-muted hover:text-foreground aria-expanded:bg-muted aria-expanded:text-foreground dark:bg-transparent dark:hover:bg-input/30 rounded-lg">
+                    {link.href}
+                  </button>
+                </Link>
+              </div>
+            </div>
+          ))}
         </div>
-
-        <div className="flex items-center gap-3">
-          <a
-            href="/signin"
-            className="inline-flex h-10 items-center rounded-md bg-white px-6 text-sm font-medium text-zinc-950 transition-colors hover:bg-zinc-200"
-          >
-            Get started
-          </a>
-          <a
-            href="https://nextjs.org/docs"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex h-10 items-center rounded-md border border-zinc-800 bg-transparent px-6 text-sm font-medium text-zinc-300 transition-colors hover:bg-zinc-900"
-          >
-            Documentation
-          </a>
+        <p>
+          To get started, edit the{" "}
+          <kbd className="pointer-events-none inline-flex h-5 w-fit min-w-5 items-center justify-center gap-1 rounded-lg bg-muted px-1 font-sans text-xs font-medium text-muted-foreground select-none in-data-[slot=input-group]:bg-input in-data-[slot=tooltip-content]:bg-background/20 in-data-[slot=tooltip-content]:text-background dark:in-data-[slot=tooltip-content]:bg-background/10 [&_svg:not([class*='size-'])]:size-3">
+            page.tsx
+          </kbd>{" "}
+          file
+        </p>
+        <div className="mt-3">
+          <Link href={"https://nextjs.org/docs"} target="_blank">
+            <button className="h-8 gap-1.5 px-3 has-data-[icon=inline-end]:pr-2.5 has-data-[icon=inline-start]:pl-2.5 bg-gray-800 text-white hover:bg-gray-700/80 rounded-full text-sm">
+              Read docs
+            </button>
+          </Link>
         </div>
       </div>
-    </main>
+    </div>
   );
 }
 `;
@@ -295,31 +298,61 @@ export default function Home() {
 
 export const plainNotFound = `import Link from "next/link";
 
+const LostIcon = () => {
+  return (
+    <svg
+      aria-hidden="true"
+      xmlns="http://www.w3.org/2000/svg"
+      className="size-8"
+      fill="currentColor"
+      viewBox="0 0 256 256"
+    >
+      <path d="M176,140a12,12,0,1,1-12-12A12,12,0,0,1,176,140ZM128,92a12,12,0,1,0-12,12A12,12,0,0,0,128,92Zm73-38A104,104,0,0,0,50.48,197.33,8,8,0,1,0,62.4,186.66a88,88,0,1,1,131.19,0,8,8,0,0,0,11.93,10.67A104,104,0,0,0,201,54ZM152,168H136c-21.74,0-48-17.84-48-40a41.33,41.33,0,0,1,.55-6.68,8,8,0,1,0-15.78-2.64A56.9,56.9,0,0,0,72,128c0,14.88,7.46,29.13,21,40.15C105.4,178.22,121.07,184,136,184h16a8,8,0,0,1,0,16H96a24,24,0,0,0,0,48,8,8,0,0,0,0-16,8,8,0,0,1,0-16h56a24,24,0,0,0,0-48Z" />
+    </svg>
+  );
+};
+
 export default function NotFound() {
   return (
-    <main className="flex min-h-dvh flex-col items-center justify-center bg-zinc-950 px-6 py-12">
-      <div className="flex max-w-md w-full flex-col items-center gap-8 text-center">
-        <div className="flex flex-col items-center gap-4">
-          <div className="inline-flex items-center gap-2 rounded-full border border-zinc-800 bg-zinc-900/60 px-3 py-1 text-xs font-medium text-zinc-400">
-            <span className="size-1.5 rounded-full bg-rose-500 animate-pulse" />
-            404 Error
+    <main className="min-h-dvh bg-white text-zinc-950">
+      <div className="mx-auto flex min-h-dvh w-full max-w-sm items-center justify-center px-6">
+        <section
+          aria-labelledby="not-found-heading"
+          className="w-full text-center"
+        >
+          <div className="mx-auto mb-5 flex size-12 items-center justify-center rounded-full bg-zinc-100 text-zinc-500">
+            <LostIcon />
           </div>
-          <h1 className="text-4xl font-bold tracking-tight text-white sm:text-5xl">
-            Page not found
-          </h1>
-          <p className="text-base leading-relaxed text-zinc-400">
-            Sorry, we couldn't find the page you're looking for. It might have been moved or deleted.
-          </p>
-        </div>
 
-        <div className="flex items-center gap-3">
-          <Link
-            href="/"
-            className="inline-flex h-10 items-center rounded-md bg-white px-6 text-sm font-medium text-zinc-950 transition-colors hover:bg-zinc-200"
-          >
-            Go back home
-          </Link>
-        </div>
+          <div className="space-y-2">
+            <p className="text-sm font-semibold text-zinc-500">404</p>
+            <h1
+              id="not-found-heading"
+              className="text-lg font-semibold tracking-tight text-zinc-950"
+            >
+              Looks Like You&apos;re Lost
+            </h1>
+            <p className="mx-auto max-w-xs text-sm leading-6 text-zinc-500">
+              The page you&apos;re trying to access doesn&apos;t exist or is no
+              longer available.
+            </p>
+          </div>
+
+          <div className="mt-6 flex items-center justify-center gap-3">
+            <Link
+              href="/"
+              className="inline-flex h-7 items-center justify-center rounded-full bg-zinc-950 px-4 text-sm font-semibold text-white transition hover:bg-zinc-800 focus:outline-none focus:ring-2 focus:ring-zinc-300 focus:ring-offset-2"
+            >
+              Go home
+            </Link>
+            <Link
+              href="/signin"
+              className="inline-flex h-7 items-center justify-center rounded-full border border-zinc-200 bg-white px-4 text-sm font-semibold text-zinc-800 transition hover:bg-zinc-50 focus:outline-none focus:ring-2 focus:ring-zinc-300 focus:ring-offset-2"
+            >
+              Sign in
+            </Link>
+          </div>
+        </section>
       </div>
     </main>
   );
